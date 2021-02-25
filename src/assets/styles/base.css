@@ -23,3 +23,7 @@ input{
 html,body,#app,.home-page, .el-container{
     height: 100%;
 } 
+
+body {
+    margin: 0;
+}

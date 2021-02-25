@@ -45,10 +45,21 @@
          loop 如果出现该视频，则当媒介文件完成播放后再次开始播放
          preload 如果出现该属性，则视频在页面加载时进行加载，并预备播放
                  如果使用autoplay，则忽略该属性-->
+
+    <!-- 三个el-form-item，代表有三个主要的部分，一个放用户名，一个放密码，一个放提交按钮 -->
   </div>
 </template>
 
 <script>
+//登入逻辑的实现
+//1.手机用户输入的username和password传递给后端
+//2.登入通过后，将后端返回的token存到本地,跳转到本地
+//3.每次请求的时候，携带token
+//4.展示token校验正确的数据
+//5.校验不通过，跳转到登入页
+
+import { login } from "@/api";
+import { mapMutations } from "vuex";
 export default {
   data() {
     /**
@@ -99,13 +110,61 @@ export default {
       }
     };
   },
+  /* 点击提交按钮，触发submitForm事件；通过this.$refs获取到一个值，if语句判断，如果本地校验通过，会发生的逻辑：
+     1.打开登录页面加载动画（这部分elemnent ui上找，有很多效果图）
+     2.login事件，传递账号和密码给后端，如果传输成功会发生的事：
+                      one：服务器响应，关闭动画；
+                      two：再次给判断，如果密码和账号正确，就会跳转到另一个页面，同时将后端返回的token数据保存到本地，
+                      最后还有 this.$message.success("登录成功")会有效果出现，更好看一点
+  */
   methods: {
+    ...mapMutations(["SET_USERINFO"]),
     submitForm(formName) {
       // console.log(this.$refs[formName])
+      //ref用于给组件或者dom元素注册引用信息，这些引用信息可以通过$refs获取
+      //1.ref作用在dom元素上的时候，可以获取当前ref所在的真是的dom
+      //2.作用在子组件上
+      //3.ref虽然可以完成父子传值的过程，但获取到的是一个静态值，不会即使更新
       this.$refs[formName].validate(valid => {
         if (valid) {
           //代表本地校验通过
-          alert("submit!");
+          //  console.log(this.loginForm.username,this.loginForm.password);
+
+          //打开登录页面加载动画
+          const loading = this.$loading({
+            lock: true,
+            text: "正在登录...",
+            spinner: "el-icon-loading",
+            background: "rgba(0, 0, 0, 0.7)"
+          });
+
+          login(this.loginForm.username, this.loginForm.password)
+            .then(res => {
+              //服务器响应，关闭动画
+              loading.close();
+
+              console.log(res);
+              if (res.data.state) {
+                //用户名和密码正确
+                this.$message.success("登录成功");
+                //再登陆请求成功后，会返回一个token值，用localstorage保存
+                localStorage.setItem("qf2008-token", res.data.token);
+                localStorage.setItem(
+                  "qf2008-userInfo",
+                  JSON.stringify(res.data.userInfo)
+                );
+                //更改vuex中state["userInfo"]的值
+                this.SET_USERINFO(res.data.userInfo);
+                //跳转到主页
+                this.$router.push("/home");
+              } else {
+                // alert("用户名密码错误");
+                this.$message.error("用户名或密码错误");
+              }
+            })
+            .catch(err => {
+              console.log(err);
+            });
         } else {
           console.log("error submit!!");
           return false;

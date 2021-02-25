@@ -1,99 +1,129 @@
 <template>
   <div class="home-page">
     <el-container>
-      <!-- 侧边栏 -->
+      <!-- 侧边栏菜单栏 -->
       <el-aside width="200px">
-        <el-radio-group v-model="isCollapse" style="margin-bottom: 20px">
-          <el-radio-button :label="false">展开</el-radio-button>
-          <el-radio-button :label="true">收起</el-radio-button>
-        </el-radio-group>
-        <el-menu
-          default-active="1-4-1"
-          class="el-menu-vertical-demo"
-          @open="handleOpen"
-          @close="handleClose"
-          :collapse="isCollapse"
-        >
-          <el-submenu index="1">
-            <template slot="title">
-              <i class="el-icon-location"></i>
-              <span slot="title">导航一</span>
-            </template>
-            <el-menu-item-group>
-              <span slot="title">分组一</span>
-              <el-menu-item index="1-1">选项1</el-menu-item>
-              <el-menu-item index="1-2">选项2</el-menu-item>
-            </el-menu-item-group>
-            <el-menu-item-group title="分组2">
-              <el-menu-item index="1-3">选项3</el-menu-item>
-            </el-menu-item-group>
-            <el-submenu index="1-4">
-              <span slot="title">选项4</span>
-              <el-menu-item index="1-4-1">选项1</el-menu-item>
-            </el-submenu>
-          </el-submenu>
-          <el-menu-item index="2">
-            <i class="el-icon-menu"></i>
-            <span slot="title">导航二</span>
-          </el-menu-item>
-          <el-menu-item index="3" disabled>
-            <i class="el-icon-document"></i>
-            <span slot="title">导航三</span>
-          </el-menu-item>
-          <el-menu-item index="4">
-            <i class="el-icon-setting"></i>
-            <span slot="title">导航四</span>
-          </el-menu-item>
-        </el-menu>
+        <subMenu></subMenu>
       </el-aside>
       <el-container>
-        <!-- 顶部栏 -->
-        <el-header>Header</el-header>
+        <!-- 顶部栏布局 -->
+        <el-header>
+          <el-row type="flex" justify="space-between" class="row-bg">
+            <el-col>
+              <div class="tubiao">图标</div>
+            </el-col>
+            <el-col>
+              <div>有佳管理系统</div>
+            </el-col>
+            <el-col>
+              <div class="tupiao">
+                <el-avatar
+                  shape="square"
+                  fit="fit"
+                  src="http://thirdwx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTIzXDib7zrmdYxdEQpYk85B26DZAJS6PUJC7ic4Fydibdz9L2gU3hloPcibuyo0xAFztxqPbgdVWp1zpQ/132"
+                ></el-avatar>
+                <span calss="nickname">欢迎您:{{ userInfo.nickname }}</span
+                >&nbsp;&nbsp;
+                <span @click="quit" class="quit">退出</span>
+              </div>
+            </el-col>
+          </el-row>
+        </el-header>
         <!-- 主体区域 -->
-        <el-main>Main</el-main>
+        <el-main> </el-main>
       </el-container>
     </el-container>
   </div>
 </template>
 <script>
+import { getLoginLog } from "@/api";
+import subMenu from "../../components/subMenu";
+import { mapState } from "vuex"; //引入userInfo，并将它的userInfo.nickname渲染到页面上
 export default {
-  data() {
-    return {
-      isCollapse: true
-    };
+  mounted() {
+    getLoginLog().then(res => {
+      console.log(res);
+    });
   },
+  components: {
+    subMenu
+  },
+  computed: {
+    ...mapState(["userInfo"])
+  },
+  //   data() {
+  //     return {
+  //       isCollapse: true,
+  //     };
+  //   },
+  //   methods: {
+  //     handleOpen(key, keyPath) {
+  //       console.log(key, keyPath);
+  //     },
+  //     handleClose(key, keyPath) {
+  //       console.log(key, keyPath);
+  //     },
+  //   },
+
   methods: {
-    handleOpen(key, keyPath) {
-      console.log(key, keyPath);
-    },
-    handleClose(key, keyPath) {
-      console.log(key, keyPath);
+    quit() {
+      //退出登入
+      //1，清除token和userInfo
+      //2.跳转到登入页
+      localStorage.removeItem("qf2008-token");
+      localStorage.removeItem("qf2008-userInfo");
+      this.$router.push("/login");
     }
   }
 };
 </script>
 <style>
+.quit {
+  cursor: pointer; /* 意思是啥，记得看看 */
+  color: pink;
+}
 .el-menu-vertical-demo:not(.el-menu--collapse) {
   width: 200px;
   min-height: 400px;
 }
-.el-header,
-.el-footer {
+/* 修改avatar样式 */
+.el-avatar.el-avatar--square {
+  vertical-align: middle;
+  margin-right: 10px;
+}
+
+/* 顶部栏样式 */
+.row-bg {
+  background-color: greenyellow;
+}
+.tubiao {
+  border-radius: 4px;
+  min-height: 60px;
+}
+/* container样式 */
+.el-header {
+  background-color: #e9eef3;
+  color: black;
+  text-align: center;
+  line-height: 60px;
+  padding: 0;
+}
+/* .el-footer {
   background-color: #b3c0d1;
   color: #333;
   text-align: center;
   line-height: 60px;
-}
+} */
 
-.el-aside {
+/* .el-aside {
   background-color: #d3dce6;
   color: #333;
   text-align: center;
   line-height: 200px;
-}
+} */
 
 .el-main {
-  background-color: #e9eef3;
+  background-color: #fff;
   color: #333;
   text-align: center;
   line-height: 160px;
